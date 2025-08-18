@@ -301,68 +301,7 @@ export class CreateBeneficialOwnersTable1755218400004 implements MigrationInterf
             default: "CURRENT_TIMESTAMP",
           },
         ],
-        indices: [
-          new Index({
-            name: "IDX_BENEFICIAL_OWNERS_KYB_ID",
-            columnNames: ["kyb_verification_id"],
-          }),
-          new Index({
-            name: "IDX_BENEFICIAL_OWNERS_REFERENCE",
-            columnNames: ["ubo_reference"],
-          }),
-          new Index({
-            name: "IDX_BENEFICIAL_OWNERS_TYPE",
-            columnNames: ["owner_type"],
-          }),
-          new Index({
-            name: "IDX_BENEFICIAL_OWNERS_UBO_FLAG",
-            columnNames: ["is_ultimate_beneficial_owner"],
-          }),
-          new Index({
-            name: "IDX_BENEFICIAL_OWNERS_VERIFICATION_STATUS",
-            columnNames: ["verification_status"],
-          }),
-          new Index({
-            name: "IDX_BENEFICIAL_OWNERS_PEP_STATUS",
-            columnNames: ["pep_status"],
-          }),
-          new Index({
-            name: "IDX_BENEFICIAL_OWNERS_RISK_LEVEL",
-            columnNames: ["risk_level"],
-          }),
-          new Index({
-            name: "IDX_BENEFICIAL_OWNERS_SANCTIONS_SCREENED",
-            columnNames: ["sanctions_screened"],
-          }),
-          new Index({
-            name: "IDX_BENEFICIAL_OWNERS_ACTIVE",
-            columnNames: ["is_active"],
-          }),
-          new Index({
-            name: "IDX_BENEFICIAL_OWNERS_EFFECTIVE_FROM",
-            columnNames: ["effective_from"],
-          }),
-          new Index({
-            name: "IDX_BENEFICIAL_OWNERS_EFFECTIVE_UNTIL",
-            columnNames: ["effective_until"],
-          }),
-          new Index({
-            name: "IDX_BENEFICIAL_OWNERS_FIRST_LAST_NAME",
-            columnNames: ["first_name", "last_name"],
-          }),
-          new Index({
-            name: "IDX_BENEFICIAL_OWNERS_ENTITY_NAME",
-            columnNames: ["entity_name"],
-          }),
-          new Index({
-            name: "IDX_BENEFICIAL_OWNERS_ID_DOCUMENT",
-            columnNames: ["id_document_number", "id_document_country"],
-          }),
-          new Index({
-            name: "IDX_BENEFICIAL_OWNERS_CREATED_AT",
-            columnNames: ["created_at"],
-          }),
-        ],
+        // Indexes will be created via queryRunner.query() after table creation
         foreignKeys: [
           {
             name: "FK_BENEFICIAL_OWNERS_KYB_VERIFICATION",
@@ -407,7 +346,7 @@ export class CreateBeneficialOwnersTable1755218400004 implements MigrationInterf
         exists_check INTEGER;
       BEGIN
         LOOP
-          -- Generate UBO reference: UBO + YYYYMMDD + 8 random digits
+          // Generate UBO reference: UBO + YYYYMMDD + 8 random digits
           new_reference := 'UBO' || TO_CHAR(CURRENT_DATE, 'YYYYMMDD') || LPAD(FLOOR(RANDOM() * 100000000)::TEXT, 8, '0');
           
           SELECT COUNT(*) INTO exists_check 
@@ -433,7 +372,7 @@ export class CreateBeneficialOwnersTable1755218400004 implements MigrationInterf
           NEW.ubo_reference := generate_ubo_reference();
         END IF;
         
-        -- Automatically set UBO flag based on ownership percentage
+        // Automatically set UBO flag based on ownership percentage
         IF NEW.ownership_percentage >= 25.00 OR NEW.control_percentage >= 25.00 THEN
           NEW.is_ultimate_beneficial_owner := true;
         END IF;
@@ -450,19 +389,36 @@ export class CreateBeneficialOwnersTable1755218400004 implements MigrationInterf
       EXECUTE FUNCTION set_ubo_reference_and_flag();
     `);
 
-    -- Create index for ownership percentage queries
+    // Create index for ownership percentage queries
     await queryRunner.query(`
       CREATE INDEX IDX_BENEFICIAL_OWNERS_OWNERSHIP_PERCENTAGE 
       ON beneficial_owners (ownership_percentage) 
       WHERE ownership_percentage >= 25.00;
     `);
 
-    -- Create index for control percentage queries
+    // Create index for control percentage queries
     await queryRunner.query(`
       CREATE INDEX IDX_BENEFICIAL_OWNERS_CONTROL_PERCENTAGE 
       ON beneficial_owners (control_percentage) 
       WHERE control_percentage >= 25.00;
     `);
+
+    // Create additional indexes
+    await queryRunner.query(`CREATE INDEX IDX_BENEFICIAL_OWNERS_KYB_ID ON beneficial_owners (kyb_verification_id)`);
+    await queryRunner.query(`CREATE INDEX IDX_BENEFICIAL_OWNERS_REFERENCE ON beneficial_owners (ubo_reference)`);
+    await queryRunner.query(`CREATE INDEX IDX_BENEFICIAL_OWNERS_TYPE ON beneficial_owners (owner_type)`);
+    await queryRunner.query(`CREATE INDEX IDX_BENEFICIAL_OWNERS_UBO_FLAG ON beneficial_owners (is_ultimate_beneficial_owner)`);
+    await queryRunner.query(`CREATE INDEX IDX_BENEFICIAL_OWNERS_VERIFICATION_STATUS ON beneficial_owners (verification_status)`);
+    await queryRunner.query(`CREATE INDEX IDX_BENEFICIAL_OWNERS_PEP_STATUS ON beneficial_owners (pep_status)`);
+    await queryRunner.query(`CREATE INDEX IDX_BENEFICIAL_OWNERS_RISK_LEVEL ON beneficial_owners (risk_level)`);
+    await queryRunner.query(`CREATE INDEX IDX_BENEFICIAL_OWNERS_SANCTIONS_SCREENED ON beneficial_owners (sanctions_screened)`);
+    await queryRunner.query(`CREATE INDEX IDX_BENEFICIAL_OWNERS_ACTIVE ON beneficial_owners (is_active)`);
+    await queryRunner.query(`CREATE INDEX IDX_BENEFICIAL_OWNERS_EFFECTIVE_FROM ON beneficial_owners (effective_from)`);
+    await queryRunner.query(`CREATE INDEX IDX_BENEFICIAL_OWNERS_EFFECTIVE_UNTIL ON beneficial_owners (effective_until)`);
+    await queryRunner.query(`CREATE INDEX IDX_BENEFICIAL_OWNERS_FIRST_LAST_NAME ON beneficial_owners (first_name, last_name)`);
+    await queryRunner.query(`CREATE INDEX IDX_BENEFICIAL_OWNERS_ENTITY_NAME ON beneficial_owners (entity_name)`);
+    await queryRunner.query(`CREATE INDEX IDX_BENEFICIAL_OWNERS_ID_DOCUMENT ON beneficial_owners (id_document_number, id_document_country)`);
+    await queryRunner.query(`CREATE INDEX IDX_BENEFICIAL_OWNERS_CREATED_AT ON beneficial_owners (created_at)`);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

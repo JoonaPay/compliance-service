@@ -157,44 +157,7 @@ export class CreateKycVerificationsTable1755218400000 implements MigrationInterf
             default: "CURRENT_TIMESTAMP",
           },
         ],
-        indices: [
-          new Index({
-            name: "IDX_KYC_VERIFICATIONS_USER_ID",
-            columnNames: ["user_id"],
-          }),
-          new Index({
-            name: "IDX_KYC_VERIFICATIONS_REFERENCE",
-            columnNames: ["verification_reference"],
-          }),
-          new Index({
-            name: "IDX_KYC_VERIFICATIONS_TYPE",
-            columnNames: ["verification_type"],
-          }),
-          new Index({
-            name: "IDX_KYC_VERIFICATIONS_STATUS",
-            columnNames: ["status"],
-          }),
-          new Index({
-            name: "IDX_KYC_VERIFICATIONS_PROVIDER",
-            columnNames: ["provider"],
-          }),
-          new Index({
-            name: "IDX_KYC_VERIFICATIONS_PROVIDER_ID",
-            columnNames: ["provider_verification_id"],
-          }),
-          new Index({
-            name: "IDX_KYC_VERIFICATIONS_EXPIRES_AT",
-            columnNames: ["expires_at"],
-          }),
-          new Index({
-            name: "IDX_KYC_VERIFICATIONS_CREATED_AT",
-            columnNames: ["created_at"],
-          }),
-          new Index({
-            name: "IDX_KYC_VERIFICATIONS_COMPLETED_AT",
-            columnNames: ["completed_at"],
-          }),
-        ],
+        // Indexes will be created via queryRunner.query() after table creation
       }),
       true,
     );
@@ -226,7 +189,7 @@ export class CreateKycVerificationsTable1755218400000 implements MigrationInterf
         exists_check INTEGER;
       BEGIN
         LOOP
-          -- Generate verification reference: KYC + YYYYMMDD + 8 random digits
+          // Generate verification reference: KYC + YYYYMMDD + 8 random digits
           new_reference := 'KYC' || TO_CHAR(CURRENT_DATE, 'YYYYMMDD') || LPAD(FLOOR(RANDOM() * 100000000)::TEXT, 8, '0');
           
           SELECT COUNT(*) INTO exists_check 
@@ -262,6 +225,17 @@ export class CreateKycVerificationsTable1755218400000 implements MigrationInterf
       FOR EACH ROW
       EXECUTE FUNCTION set_verification_reference();
     `);
+
+    // Create indexes
+    await queryRunner.query(`CREATE INDEX IDX_KYC_VERIFICATIONS_USER_ID ON kyc_verifications (user_id)`);
+    await queryRunner.query(`CREATE INDEX IDX_KYC_VERIFICATIONS_REFERENCE ON kyc_verifications (verification_reference)`);
+    await queryRunner.query(`CREATE INDEX IDX_KYC_VERIFICATIONS_TYPE ON kyc_verifications (verification_type)`);
+    await queryRunner.query(`CREATE INDEX IDX_KYC_VERIFICATIONS_STATUS ON kyc_verifications (status)`);
+    await queryRunner.query(`CREATE INDEX IDX_KYC_VERIFICATIONS_PROVIDER ON kyc_verifications (provider)`);
+    await queryRunner.query(`CREATE INDEX IDX_KYC_VERIFICATIONS_PROVIDER_ID ON kyc_verifications (provider_verification_id)`);
+    await queryRunner.query(`CREATE INDEX IDX_KYC_VERIFICATIONS_EXPIRES_AT ON kyc_verifications (expires_at)`);
+    await queryRunner.query(`CREATE INDEX IDX_KYC_VERIFICATIONS_CREATED_AT ON kyc_verifications (created_at)`);
+    await queryRunner.query(`CREATE INDEX IDX_KYC_VERIFICATIONS_COMPLETED_AT ON kyc_verifications (completed_at)`);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

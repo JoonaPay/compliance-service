@@ -258,60 +258,7 @@ export class CreateKybVerificationsTable1755218400002 implements MigrationInterf
             default: "CURRENT_TIMESTAMP",
           },
         ],
-        indices: [
-          new Index({
-            name: "IDX_KYB_VERIFICATIONS_BUSINESS_ID",
-            columnNames: ["business_id"],
-          }),
-          new Index({
-            name: "IDX_KYB_VERIFICATIONS_REFERENCE",
-            columnNames: ["verification_reference"],
-          }),
-          new Index({
-            name: "IDX_KYB_VERIFICATIONS_STATUS",
-            columnNames: ["status"],
-          }),
-          new Index({
-            name: "IDX_KYB_VERIFICATIONS_STAGE",
-            columnNames: ["verification_stage"],
-          }),
-          new Index({
-            name: "IDX_KYB_VERIFICATIONS_RISK_LEVEL",
-            columnNames: ["risk_level"],
-          }),
-          new Index({
-            name: "IDX_KYB_VERIFICATIONS_BUSINESS_NAME",
-            columnNames: ["business_name"],
-          }),
-          new Index({
-            name: "IDX_KYB_VERIFICATIONS_REGISTRATION_NUMBER",
-            columnNames: ["registration_number"],
-          }),
-          new Index({
-            name: "IDX_KYB_VERIFICATIONS_TAX_ID",
-            columnNames: ["tax_id"],
-          }),
-          new Index({
-            name: "IDX_KYB_VERIFICATIONS_PROVIDER",
-            columnNames: ["provider"],
-          }),
-          new Index({
-            name: "IDX_KYB_VERIFICATIONS_PROVIDER_ID",
-            columnNames: ["provider_verification_id"],
-          }),
-          new Index({
-            name: "IDX_KYB_VERIFICATIONS_EXPIRES_AT",
-            columnNames: ["expires_at"],
-          }),
-          new Index({
-            name: "IDX_KYB_VERIFICATIONS_CREATED_AT",
-            columnNames: ["created_at"],
-          }),
-          new Index({
-            name: "IDX_KYB_VERIFICATIONS_COMPLETED_AT",
-            columnNames: ["completed_at"],
-          }),
-        ],
+        // Indexes will be created via queryRunner.query() after table creation
       }),
       true,
     );
@@ -333,7 +280,7 @@ export class CreateKybVerificationsTable1755218400002 implements MigrationInterf
         exists_check INTEGER;
       BEGIN
         LOOP
-          -- Generate verification reference: KYB + YYYYMMDD + 8 random digits
+          // Generate verification reference: KYB + YYYYMMDD + 8 random digits
           new_reference := 'KYB' || TO_CHAR(CURRENT_DATE, 'YYYYMMDD') || LPAD(FLOOR(RANDOM() * 100000000)::TEXT, 8, '0');
           
           SELECT COUNT(*) INTO exists_check 
@@ -369,6 +316,21 @@ export class CreateKybVerificationsTable1755218400002 implements MigrationInterf
       FOR EACH ROW
       EXECUTE FUNCTION set_kyb_verification_reference();
     `);
+
+    // Create indexes
+    await queryRunner.query(`CREATE INDEX IDX_KYB_VERIFICATIONS_BUSINESS_ID ON kyb_verifications (business_id)`);
+    await queryRunner.query(`CREATE INDEX IDX_KYB_VERIFICATIONS_REFERENCE ON kyb_verifications (verification_reference)`);
+    await queryRunner.query(`CREATE INDEX IDX_KYB_VERIFICATIONS_STATUS ON kyb_verifications (status)`);
+    await queryRunner.query(`CREATE INDEX IDX_KYB_VERIFICATIONS_STAGE ON kyb_verifications (verification_stage)`);
+    await queryRunner.query(`CREATE INDEX IDX_KYB_VERIFICATIONS_RISK_LEVEL ON kyb_verifications (risk_level)`);
+    await queryRunner.query(`CREATE INDEX IDX_KYB_VERIFICATIONS_BUSINESS_NAME ON kyb_verifications (business_name)`);
+    await queryRunner.query(`CREATE INDEX IDX_KYB_VERIFICATIONS_REGISTRATION_NUMBER ON kyb_verifications (registration_number)`);
+    await queryRunner.query(`CREATE INDEX IDX_KYB_VERIFICATIONS_TAX_ID ON kyb_verifications (tax_id)`);
+    await queryRunner.query(`CREATE INDEX IDX_KYB_VERIFICATIONS_PROVIDER ON kyb_verifications (provider)`);
+    await queryRunner.query(`CREATE INDEX IDX_KYB_VERIFICATIONS_PROVIDER_ID ON kyb_verifications (provider_verification_id)`);
+    await queryRunner.query(`CREATE INDEX IDX_KYB_VERIFICATIONS_EXPIRES_AT ON kyb_verifications (expires_at)`);
+    await queryRunner.query(`CREATE INDEX IDX_KYB_VERIFICATIONS_CREATED_AT ON kyb_verifications (created_at)`);
+    await queryRunner.query(`CREATE INDEX IDX_KYB_VERIFICATIONS_COMPLETED_AT ON kyb_verifications (completed_at)`);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

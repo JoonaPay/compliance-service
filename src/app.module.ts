@@ -12,6 +12,16 @@ import { validationSchema } from './shared/config/env.validation';
 // Core Modules
 import { complianceModule } from './modules/compliance/compliance.module';
 
+// DDD Modules
+import { KycVerificationModule } from './modules/kyc-verification/kyc-verification.module';
+import { KybVerificationModule } from './modules/kyb-verification/kyb-verification.module';
+import { SanctionsScreeningModule } from './modules/sanctions-screening/sanctions-screening.module';
+
+// ORM Entities from DDD modules
+import { OrmEntities as KycOrmEntities } from './modules/kyc-verification/infrastructure/orm-entities';
+import { OrmEntities as KybOrmEntities } from './modules/kyb-verification/infrastructure/orm-entities';
+import { OrmEntities as SanctionsOrmEntities } from './modules/sanctions-screening/infrastructure/orm-entities';
+
 // Shared Services
 import { KafkaService } from './shared/kafka/kafka.service';
 import { MetricsService } from './shared/metrics/metrics.service';
@@ -46,7 +56,12 @@ import { AppService } from './app.service';
         password: configService.get<string>('database.password'),
         database: configService.get<string>('database.name'),
         ssl: configService.get<boolean>('database.ssl'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        entities: [
+          ...KycOrmEntities,
+          ...KybOrmEntities,
+          ...SanctionsOrmEntities,
+          __dirname + '/**/*.entity{.ts,.js}'
+        ],
         migrations: [__dirname + '/shared/database/migrations/*{.ts,.js}'],
         synchronize: configService.get<boolean>('database.synchronize', false),
         logging: configService.get<boolean>('database.logging', false),
@@ -88,6 +103,11 @@ import { AppService } from './app.service';
 
     // Business Modules
     complianceModule,
+    
+    // DDD CQRS Modules
+    KycVerificationModule,
+    KybVerificationModule,
+    SanctionsScreeningModule,
   ],
   controllers: [
     AppController,

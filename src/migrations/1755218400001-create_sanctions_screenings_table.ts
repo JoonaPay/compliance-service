@@ -172,48 +172,7 @@ export class CreateSanctionsScreeningsTable1755218400001 implements MigrationInt
             default: "CURRENT_TIMESTAMP",
           },
         ],
-        indices: [
-          new Index({
-            name: "IDX_SANCTIONS_SCREENINGS_ENTITY_ID",
-            columnNames: ["entity_id"],
-          }),
-          new Index({
-            name: "IDX_SANCTIONS_SCREENINGS_ENTITY_TYPE",
-            columnNames: ["entity_type"],
-          }),
-          new Index({
-            name: "IDX_SANCTIONS_SCREENINGS_REFERENCE",
-            columnNames: ["screening_reference"],
-          }),
-          new Index({
-            name: "IDX_SANCTIONS_SCREENINGS_TYPE",
-            columnNames: ["screening_type"],
-          }),
-          new Index({
-            name: "IDX_SANCTIONS_SCREENINGS_STATUS",
-            columnNames: ["status"],
-          }),
-          new Index({
-            name: "IDX_SANCTIONS_SCREENINGS_RISK_LEVEL",
-            columnNames: ["risk_level"],
-          }),
-          new Index({
-            name: "IDX_SANCTIONS_SCREENINGS_MANUAL_REVIEW",
-            columnNames: ["manual_review_required"],
-          }),
-          new Index({
-            name: "IDX_SANCTIONS_SCREENINGS_NEXT_DATE",
-            columnNames: ["next_screening_date"],
-          }),
-          new Index({
-            name: "IDX_SANCTIONS_SCREENINGS_COMPLETED_AT",
-            columnNames: ["completed_at"],
-          }),
-          new Index({
-            name: "IDX_SANCTIONS_SCREENINGS_CREATED_AT",
-            columnNames: ["created_at"],
-          }),
-        ],
+        // Indexes will be created via queryRunner.query() after table creation
       }),
       true,
     );
@@ -235,7 +194,7 @@ export class CreateSanctionsScreeningsTable1755218400001 implements MigrationInt
         exists_check INTEGER;
       BEGIN
         LOOP
-          -- Generate screening reference: SCR + YYYYMMDD + 8 random digits
+          // Generate screening reference: SCR + YYYYMMDD + 8 random digits
           new_reference := 'SCR' || TO_CHAR(CURRENT_DATE, 'YYYYMMDD') || LPAD(FLOOR(RANDOM() * 100000000)::TEXT, 8, '0');
           
           SELECT COUNT(*) INTO exists_check 
@@ -271,6 +230,18 @@ export class CreateSanctionsScreeningsTable1755218400001 implements MigrationInt
       FOR EACH ROW
       EXECUTE FUNCTION set_screening_reference();
     `);
+
+    // Create indexes
+    await queryRunner.query(`CREATE INDEX IDX_SANCTIONS_SCREENINGS_ENTITY_ID ON sanctions_screenings (entity_id)`);
+    await queryRunner.query(`CREATE INDEX IDX_SANCTIONS_SCREENINGS_ENTITY_TYPE ON sanctions_screenings (entity_type)`);
+    await queryRunner.query(`CREATE INDEX IDX_SANCTIONS_SCREENINGS_REFERENCE ON sanctions_screenings (screening_reference)`);
+    await queryRunner.query(`CREATE INDEX IDX_SANCTIONS_SCREENINGS_TYPE ON sanctions_screenings (screening_type)`);
+    await queryRunner.query(`CREATE INDEX IDX_SANCTIONS_SCREENINGS_STATUS ON sanctions_screenings (status)`);
+    await queryRunner.query(`CREATE INDEX IDX_SANCTIONS_SCREENINGS_RISK_LEVEL ON sanctions_screenings (risk_level)`);
+    await queryRunner.query(`CREATE INDEX IDX_SANCTIONS_SCREENINGS_MANUAL_REVIEW ON sanctions_screenings (manual_review_required)`);
+    await queryRunner.query(`CREATE INDEX IDX_SANCTIONS_SCREENINGS_NEXT_DATE ON sanctions_screenings (next_screening_date)`);
+    await queryRunner.query(`CREATE INDEX IDX_SANCTIONS_SCREENINGS_COMPLETED_AT ON sanctions_screenings (completed_at)`);
+    await queryRunner.query(`CREATE INDEX IDX_SANCTIONS_SCREENINGS_CREATED_AT ON sanctions_screenings (created_at)`);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

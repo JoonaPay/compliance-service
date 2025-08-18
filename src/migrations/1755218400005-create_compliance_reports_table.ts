@@ -329,84 +329,7 @@ export class CreateComplianceReportsTable1755218400005 implements MigrationInter
             default: "CURRENT_TIMESTAMP",
           },
         ],
-        indices: [
-          new Index({
-            name: "IDX_COMPLIANCE_REPORTS_REFERENCE",
-            columnNames: ["report_reference"],
-          }),
-          new Index({
-            name: "IDX_COMPLIANCE_REPORTS_TYPE",
-            columnNames: ["report_type"],
-          }),
-          new Index({
-            name: "IDX_COMPLIANCE_REPORTS_CATEGORY",
-            columnNames: ["report_category"],
-          }),
-          new Index({
-            name: "IDX_COMPLIANCE_REPORTS_STATUS",
-            columnNames: ["status"],
-          }),
-          new Index({
-            name: "IDX_COMPLIANCE_REPORTS_PERIOD",
-            columnNames: ["reporting_period_start", "reporting_period_end"],
-          }),
-          new Index({
-            name: "IDX_COMPLIANCE_REPORTS_GENERATED_BY",
-            columnNames: ["generated_by"],
-          }),
-          new Index({
-            name: "IDX_COMPLIANCE_REPORTS_GENERATION_METHOD",
-            columnNames: ["generation_method"],
-          }),
-          new Index({
-            name: "IDX_COMPLIANCE_REPORTS_REGULATORY_REQ",
-            columnNames: ["regulatory_requirement"],
-          }),
-          new Index({
-            name: "IDX_COMPLIANCE_REPORTS_JURISDICTION",
-            columnNames: ["jurisdiction"],
-          }),
-          new Index({
-            name: "IDX_COMPLIANCE_REPORTS_CONFIDENTIALITY",
-            columnNames: ["confidentiality_level"],
-          }),
-          new Index({
-            name: "IDX_COMPLIANCE_REPORTS_SUBMISSION_REQUIRED",
-            columnNames: ["external_submission_required"],
-          }),
-          new Index({
-            name: "IDX_COMPLIANCE_REPORTS_SUBMISSION_DEADLINE",
-            columnNames: ["submission_deadline"],
-          }),
-          new Index({
-            name: "IDX_COMPLIANCE_REPORTS_AUTO_DELETE",
-            columnNames: ["auto_delete_at"],
-          }),
-          new Index({
-            name: "IDX_COMPLIANCE_REPORTS_NEXT_SCHEDULED",
-            columnNames: ["next_scheduled_run"],
-          }),
-          new Index({
-            name: "IDX_COMPLIANCE_REPORTS_IS_TEMPLATE",
-            columnNames: ["is_template"],
-          }),
-          new Index({
-            name: "IDX_COMPLIANCE_REPORTS_TEMPLATE_ID",
-            columnNames: ["template_id"],
-          }),
-          new Index({
-            name: "IDX_COMPLIANCE_REPORTS_VERSION",
-            columnNames: ["version"],
-          }),
-          new Index({
-            name: "IDX_COMPLIANCE_REPORTS_CREATED_AT",
-            columnNames: ["created_at"],
-          }),
-          new Index({
-            name: "IDX_COMPLIANCE_REPORTS_COMPLETED_AT",
-            columnNames: ["generation_completed_at"],
-          }),
-        ],
+        // Indexes will be created via queryRunner.query() after table creation
         foreignKeys: [
           {
             name: "FK_COMPLIANCE_REPORTS_TEMPLATE",
@@ -444,7 +367,7 @@ export class CreateComplianceReportsTable1755218400005 implements MigrationInter
         exists_check INTEGER;
       BEGIN
         LOOP
-          -- Generate report reference: RPT + YYYYMMDD + 8 random digits
+          // Generate report reference: RPT + YYYYMMDD + 8 random digits
           new_reference := 'RPT' || TO_CHAR(CURRENT_DATE, 'YYYYMMDD') || LPAD(FLOOR(RANDOM() * 100000000)::TEXT, 8, '0');
           
           SELECT COUNT(*) INTO exists_check 
@@ -512,6 +435,27 @@ export class CreateComplianceReportsTable1755218400005 implements MigrationInter
       WHERE status = 'SCHEDULED'
       AND next_scheduled_run <= CURRENT_TIMESTAMP;
     `);
+
+    // Create indexes
+    await queryRunner.query(`CREATE INDEX IDX_COMPLIANCE_REPORTS_REFERENCE ON compliance_reports (report_reference)`);
+    await queryRunner.query(`CREATE INDEX IDX_COMPLIANCE_REPORTS_TYPE ON compliance_reports (report_type)`);
+    await queryRunner.query(`CREATE INDEX IDX_COMPLIANCE_REPORTS_CATEGORY ON compliance_reports (report_category)`);
+    await queryRunner.query(`CREATE INDEX IDX_COMPLIANCE_REPORTS_STATUS ON compliance_reports (status)`);
+    await queryRunner.query(`CREATE INDEX IDX_COMPLIANCE_REPORTS_PERIOD ON compliance_reports (reporting_period_start, reporting_period_end)`);
+    await queryRunner.query(`CREATE INDEX IDX_COMPLIANCE_REPORTS_GENERATED_BY ON compliance_reports (generated_by)`);
+    await queryRunner.query(`CREATE INDEX IDX_COMPLIANCE_REPORTS_GENERATION_METHOD ON compliance_reports (generation_method)`);
+    await queryRunner.query(`CREATE INDEX IDX_COMPLIANCE_REPORTS_REGULATORY_REQ ON compliance_reports (regulatory_requirement)`);
+    await queryRunner.query(`CREATE INDEX IDX_COMPLIANCE_REPORTS_JURISDICTION ON compliance_reports (jurisdiction)`);
+    await queryRunner.query(`CREATE INDEX IDX_COMPLIANCE_REPORTS_CONFIDENTIALITY ON compliance_reports (confidentiality_level)`);
+    await queryRunner.query(`CREATE INDEX IDX_COMPLIANCE_REPORTS_SUBMISSION_REQUIRED ON compliance_reports (external_submission_required)`);
+    await queryRunner.query(`CREATE INDEX IDX_COMPLIANCE_REPORTS_SUBMISSION_DEADLINE ON compliance_reports (submission_deadline)`);
+    await queryRunner.query(`CREATE INDEX IDX_COMPLIANCE_REPORTS_AUTO_DELETE ON compliance_reports (auto_delete_at)`);
+    await queryRunner.query(`CREATE INDEX IDX_COMPLIANCE_REPORTS_NEXT_SCHEDULED ON compliance_reports (next_scheduled_run)`);
+    await queryRunner.query(`CREATE INDEX IDX_COMPLIANCE_REPORTS_IS_TEMPLATE ON compliance_reports (is_template)`);
+    await queryRunner.query(`CREATE INDEX IDX_COMPLIANCE_REPORTS_TEMPLATE_ID ON compliance_reports (template_id)`);
+    await queryRunner.query(`CREATE INDEX IDX_COMPLIANCE_REPORTS_VERSION ON compliance_reports (version)`);
+    await queryRunner.query(`CREATE INDEX IDX_COMPLIANCE_REPORTS_CREATED_AT ON compliance_reports (created_at)`);
+    await queryRunner.query(`CREATE INDEX IDX_COMPLIANCE_REPORTS_COMPLETED_AT ON compliance_reports (generation_completed_at)`);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

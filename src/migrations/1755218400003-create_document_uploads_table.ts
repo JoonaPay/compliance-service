@@ -268,60 +268,7 @@ export class CreateDocumentUploadsTable1755218400003 implements MigrationInterfa
             default: "CURRENT_TIMESTAMP",
           },
         ],
-        indices: [
-          new Index({
-            name: "IDX_DOCUMENT_UPLOADS_VERIFICATION_ID",
-            columnNames: ["verification_id"],
-          }),
-          new Index({
-            name: "IDX_DOCUMENT_UPLOADS_VERIFICATION_TYPE",
-            columnNames: ["verification_type"],
-          }),
-          new Index({
-            name: "IDX_DOCUMENT_UPLOADS_REFERENCE",
-            columnNames: ["document_reference"],
-          }),
-          new Index({
-            name: "IDX_DOCUMENT_UPLOADS_TYPE",
-            columnNames: ["document_type"],
-          }),
-          new Index({
-            name: "IDX_DOCUMENT_UPLOADS_CATEGORY",
-            columnNames: ["document_category"],
-          }),
-          new Index({
-            name: "IDX_DOCUMENT_UPLOADS_STATUS",
-            columnNames: ["upload_status"],
-          }),
-          new Index({
-            name: "IDX_DOCUMENT_UPLOADS_VERIFICATION_STATUS",
-            columnNames: ["verification_status"],
-          }),
-          new Index({
-            name: "IDX_DOCUMENT_UPLOADS_FILE_HASH",
-            columnNames: ["file_hash"],
-          }),
-          new Index({
-            name: "IDX_DOCUMENT_UPLOADS_UPLOADED_BY",
-            columnNames: ["uploaded_by"],
-          }),
-          new Index({
-            name: "IDX_DOCUMENT_UPLOADS_EXPIRY_DATE",
-            columnNames: ["expiry_date"],
-          }),
-          new Index({
-            name: "IDX_DOCUMENT_UPLOADS_AUTO_DELETE_AT",
-            columnNames: ["auto_delete_at"],
-          }),
-          new Index({
-            name: "IDX_DOCUMENT_UPLOADS_DELETED_AT",
-            columnNames: ["deleted_at"],
-          }),
-          new Index({
-            name: "IDX_DOCUMENT_UPLOADS_CREATED_AT",
-            columnNames: ["created_at"],
-          }),
-        ],
+        // Indexes will be created via queryRunner.query() after table creation
       }),
       true,
     );
@@ -343,7 +290,7 @@ export class CreateDocumentUploadsTable1755218400003 implements MigrationInterfa
         exists_check INTEGER;
       BEGIN
         LOOP
-          -- Generate document reference: DOC + YYYYMMDD + 8 random digits
+          // Generate document reference: DOC + YYYYMMDD + 8 random digits
           new_reference := 'DOC' || TO_CHAR(CURRENT_DATE, 'YYYYMMDD') || LPAD(FLOOR(RANDOM() * 100000000)::TEXT, 8, '0');
           
           SELECT COUNT(*) INTO exists_check 
@@ -360,7 +307,7 @@ export class CreateDocumentUploadsTable1755218400003 implements MigrationInterfa
       $$ LANGUAGE plpgsql;
     `);
 
-    -- Create trigger to auto-generate document references and set auto-delete date
+    // Create trigger to auto-generate document references and set auto-delete date
     await queryRunner.query(`
       CREATE OR REPLACE FUNCTION set_document_reference_and_retention()
       RETURNS TRIGGER AS $$
@@ -384,6 +331,21 @@ export class CreateDocumentUploadsTable1755218400003 implements MigrationInterfa
       FOR EACH ROW
       EXECUTE FUNCTION set_document_reference_and_retention();
     `);
+
+    // Create indexes
+    await queryRunner.query(`CREATE INDEX IDX_DOCUMENT_UPLOADS_VERIFICATION_ID ON document_uploads (verification_id)`);
+    await queryRunner.query(`CREATE INDEX IDX_DOCUMENT_UPLOADS_VERIFICATION_TYPE ON document_uploads (verification_type)`);
+    await queryRunner.query(`CREATE INDEX IDX_DOCUMENT_UPLOADS_REFERENCE ON document_uploads (document_reference)`);
+    await queryRunner.query(`CREATE INDEX IDX_DOCUMENT_UPLOADS_TYPE ON document_uploads (document_type)`);
+    await queryRunner.query(`CREATE INDEX IDX_DOCUMENT_UPLOADS_CATEGORY ON document_uploads (document_category)`);
+    await queryRunner.query(`CREATE INDEX IDX_DOCUMENT_UPLOADS_STATUS ON document_uploads (upload_status)`);
+    await queryRunner.query(`CREATE INDEX IDX_DOCUMENT_UPLOADS_VERIFICATION_STATUS ON document_uploads (verification_status)`);
+    await queryRunner.query(`CREATE INDEX IDX_DOCUMENT_UPLOADS_FILE_HASH ON document_uploads (file_hash)`);
+    await queryRunner.query(`CREATE INDEX IDX_DOCUMENT_UPLOADS_UPLOADED_BY ON document_uploads (uploaded_by)`);
+    await queryRunner.query(`CREATE INDEX IDX_DOCUMENT_UPLOADS_EXPIRY_DATE ON document_uploads (expiry_date)`);
+    await queryRunner.query(`CREATE INDEX IDX_DOCUMENT_UPLOADS_AUTO_DELETE_AT ON document_uploads (auto_delete_at)`);
+    await queryRunner.query(`CREATE INDEX IDX_DOCUMENT_UPLOADS_DELETED_AT ON document_uploads (deleted_at)`);
+    await queryRunner.query(`CREATE INDEX IDX_DOCUMENT_UPLOADS_CREATED_AT ON document_uploads (created_at)`);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

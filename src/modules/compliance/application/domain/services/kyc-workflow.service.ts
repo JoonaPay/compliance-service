@@ -102,7 +102,9 @@ export class KycWorkflowService {
       const activeKyc = existingKycs.find(kyc => 
         kyc.status === KycStatus.PENDING || 
         kyc.status === KycStatus.IN_PROGRESS || 
-        kyc.status === KycStatus.REQUIRES_MANUAL_REVIEW ||\n        kyc.isApproved()\n      );
+        kyc.status === KycStatus.REQUIRES_MANUAL_REVIEW ||
+        kyc.isApproved()
+      );
       
       if (activeKyc) {
         if (activeKyc.isApproved()) {
