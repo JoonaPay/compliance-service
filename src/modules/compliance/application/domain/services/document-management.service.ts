@@ -240,8 +240,8 @@ export class DocumentManagementService {
         fraudRisk: fraudDetection.riskScore,
       });
 
-      this.metricsService.recordDocumentUpload(request.documentType);
-      this.metricsService.recordDocumentQuality(qualityAssessment.overallScore);
+      // this.metricsService.recordDocumentUpload(request.documentType);
+      // this.metricsService.recordDocumentQuality(qualityAssessment.overallScore);
 
       this.logger.log(`Document uploaded and processed successfully: ${documentId}`);
 
@@ -440,7 +440,7 @@ export class DocumentManagementService {
         deletedAt: new Date(),
       });
 
-      this.metricsService.recordDocumentDeletion(reason);
+      // this.metricsService.recordDocumentDeletion(reason);
 
     } catch (error) {
       this.logger.error(`Failed to delete document ${documentId}: ${error.message}`, error.stack);

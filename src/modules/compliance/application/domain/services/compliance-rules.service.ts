@@ -509,6 +509,11 @@ export class ComplianceRulesService {
     this.logger.log(`Initialized ${this.rules.size} default compliance rules`);
   }
 
+  async validateKybInitiation(request: any): Promise<void> {
+    // TODO: Implement KYB initiation validation
+    this.logger.log('Validating KYB initiation request');
+  }
+
   private generateId(): string {
     return `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }

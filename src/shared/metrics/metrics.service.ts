@@ -340,6 +340,24 @@ export class MetricsService {
     }
   }
 
+  recordKybByBusinessType(businessType: string) {
+    if (!this.enabled) return;
+    try {
+      this.businessGauge.inc({ type: 'kyb_by_business_type', business_type: businessType });
+    } catch (error) {
+      this.logger.error(`Failed to record KYB by business type metric: ${error.message}`);
+    }
+  }
+
+  recordBusinessDocumentUpload(documentType: string) {
+    if (!this.enabled) return;
+    try {
+      this.documentCounter.inc({ document_type: documentType });
+    } catch (error) {
+      this.logger.error(`Failed to record business document upload metric: ${error.message}`);
+    }
+  }
+
   // Metrics Export
   getMetrics(): string {
     return register.metrics();

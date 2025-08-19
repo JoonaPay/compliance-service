@@ -41,6 +41,8 @@ export enum BusinessDocumentType {
   FINANCIAL_STATEMENTS = 'financial_statements',
   BOARD_RESOLUTION = 'board_resolution',
   POWER_OF_ATTORNEY = 'power_of_attorney',
+  GOOD_STANDING_CERTIFICATE = 'good_standing_certificate',
+  OTHER = 'other',
 }
 
 export interface BusinessDetails {
